@@ -1,0 +1,64 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sliding Auth</title>
+    <link rel="stylesheet" href="~/css/auth.css">
+    <script>
+        function toggle() {
+            document.getElementById("container").classList.toggle("active");
+        }</script>
+</head>
+<body>
+
+    <div class="container" id="container">
+
+        <!-- Sign Up -->
+        <div class="form-container sign-up">
+            <form>
+                <h2>Create Account</h2>
+                <input type="text" placeholder="Name">
+                <input type="email" placeholder="Email">
+                <input type="password" placeholder="Password">
+                <button>Sign Up</button>
+            </form>
+        </div>
+
+        <!-- Sign In -->
+        <div class="form-container sign-in">
+            <form>
+                <h2>Sign In</h2>
+                <input type="email" placeholder="Email">
+                <input type="password" placeholder="Password">
+                <button>Sign In</button>
+            </form>
+        </div>
+
+        <!-- Overlay -->
+        <div class="overlay-container">
+            <div class="overlay">
+
+                <div class="overlay-panel left">
+                    <h2>Welcome Back!</h2>
+                    <p>Enter your details</p>
+                    <button onclick="toggle()">Sign In</button>
+                </div>
+
+                <div class="overlay-panel right">
+                    <h2>Hello, Friend!</h2>
+                    <p>Register and start</p>
+                    <button onclick="toggle()">Sign Up</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

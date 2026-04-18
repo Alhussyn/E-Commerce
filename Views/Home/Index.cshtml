@@ -1,0 +1,11 @@
+﻿@model List<E_Commerce.Models.Product>
+
+<h2>Products</h2>
+
+@foreach (var item in Model)
+{
+    <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <h3>@item.Name</h3>
+        <p>Price: @item.Price</p>
+    </div>
+}

@@ -1,0 +1,48 @@
+﻿@model Product
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="~/css/Details.css">
+
+    
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="details">
+
+            <!-- صورة المنتج -->
+            <img src="~/images/@Model.ImageUrl" alt="product">
+
+            <!-- بيانات المنتج -->
+            <div class="info">
+
+                <h1>@Model.Name</h1>
+
+                <p class="price">@Model.Price جنيه</p>
+
+                <p class="desc">@Model.Description</p>
+
+                <button class="btn">Add to Cart</button>
+
+                <br><br>
+
+                <a href="/Product/Index">⬅ Back to Products</a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

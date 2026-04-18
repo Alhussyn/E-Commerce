@@ -1,0 +1,126 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial;
+}
+
+body {
+    background: #e0e5ec;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Container */
+.container {
+    position: relative;
+    width: 800px;
+    height: 500px;
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Forms */
+.form-container {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    transition: 0.6s ease-in-out;
+}
+
+.sign-in {
+    left: 0;
+    z-index: 2;
+}
+
+.sign-up {
+    left: 0;
+    opacity: 0;
+    z-index: 1;
+}
+
+/* Active State */
+.container.active .sign-in {
+    transform: translateX(100%);
+}
+
+.container.active .sign-up {
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+}
+
+/* Form style */
+form {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 50px;
+    height: 100%;
+    justify-content: center;
+}
+
+input {
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    background: #eee;
+}
+
+button {
+    margin-top: 10px;
+    padding: 12px;
+    border: none;
+    background: #1e3a8a;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Overlay */
+.overlay-container {
+    position: absolute;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: 0.6s ease-in-out;
+    z-index: 100;
+}
+
+.container.active .overlay-container {
+    transform: translateX(-100%);
+}
+
+.overlay {
+    background: #1e3a8a;
+    color: white;
+    position: relative;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    display: flex;
+    transition: 0.6s ease-in-out;
+}
+
+.container.active .overlay {
+    transform: translateX(50%);
+}
+
+/* Panels */
+.overlay-panel {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+    .overlay-panel button {
+        background: transparent;
+        border: 1px solid white;
+    }

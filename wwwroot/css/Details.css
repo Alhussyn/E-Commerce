@@ -1,0 +1,53 @@
+﻿body {
+    font-family: Arial;
+    background-color: #f5f5f5;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    margin-top: 50px;
+}
+
+.details {
+    display: flex;
+    gap: 30px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+    .details img {
+        width: 300px;
+        border-radius: 10px;
+    }
+
+.info {
+    flex: 1;
+}
+
+    .info h1 {
+        margin-bottom: 10px;
+    }
+
+.price {
+    color: green;
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.desc {
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+    .btn:hover {
+        background-color: gray;
+    }
