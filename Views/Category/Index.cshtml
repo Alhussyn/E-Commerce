@@ -1,0 +1,75 @@
+@model List<E_Commerce.Models.Category>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Categories</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Inter, sans-serif; background: #f8fafc; min-height: 100vh; padding: 40px 20px; color: #1e293b; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; font-weight: 800; }
+        .nav-links { display: flex; gap: 10px; }
+        .nav-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: #3b82f6; text-decoration: none; background: #eff6ff; padding: 10px 18px; border-radius: 10px; border: 1px solid #bfdbfe; transition: .2s; }
+        .nav-link:hover { background: #dbeafe; }
+        .btn-add { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: #1e293b; color: #fff; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 600; transition: .2s; }
+        .btn-add:hover { background: #334155; }
+        .category-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: .2s; }
+        .category-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.05); }
+        .category-name { font-weight: 700; font-size: 16px; }
+        .category-desc { font-size: 13px; color: #64748b; margin-top: 4px; }
+        .actions { display: flex; gap: 8px; }
+        .btn-edit { padding: 8px 16px; background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; transition: .15s; }
+        .btn-edit:hover { background: #dbeafe; }
+        .btn-delete { padding: 8px 16px; background: #fef2f2; color: #e63946; border: 1px solid #fecaca; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: .15s; }
+        .btn-delete:hover { background: #fee2e2; }
+        .empty { text-align: center; padding: 60px; color: #64748b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Categories</h1>
+            <div class="nav-links">
+                <a href="/Manage/Index" class="nav-link">← Dashboard</a>
+                <a href="/Category/Create" class="btn-add">+ Add Category</a>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="empty">
+                <p>No categories yet. Create your first category.</p>
+            </div>
+        }
+
+        @foreach (var cat in Model)
+        {
+            <div class="category-card">
+                <div>
+                    <div class="category-name">@cat.Name</div>
+                    @if (!string.IsNullOrEmpty(cat.Description))
+                    {
+                        <div class="category-desc">@cat.Description</div>
+                    }
+                </div>
+                <div class="actions">
+                    <a href="/Category/Edit/@cat.Id" class="btn-edit">Edit</a>
+                    <form asp-action="Delete" asp-route-id="@cat.Id" method="post" style="margin:0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-delete" onclick="return confirm('Delete this category? Products in this category will become uncategorized.')">Delete</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</body>
+</html>

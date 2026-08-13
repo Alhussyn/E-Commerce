@@ -1,159 +1,171 @@
 ﻿@model Cart
 
+@{
+    Layout = null;
+}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cart</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="~/css/cart.css" />
+    <script src="~/js/cart.js" defer></script>
+
     <style>
-        body {
-            font-family: Arial;
-            background: #f5f5f5;
-            padding: 20px;
-        }
-
-        .container {
-            width: 85%;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #ccc;
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #333;
-            color: white;
-            padding: 10px;
-        }
-
-        td {
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
-
-        img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-
-        .total {
-            text-align: right;
-            font-size: 18px;
-            margin-top: 15px;
-        }
-
-        .btn {
-            padding: 10px 15px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .buy-btn {
-            background: green;
-            color: white;
-        }
-
-        .back-btn {
-            margin:10px;
-            background:gray;
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            border-radius:5px;
-        }
-        .clear-btn{
-            margin:10px;
-            padding: 10px 15px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            background-color:darkkhaki;
-            color:aliceblue
-        }
+        .qty-form { display: inline-flex; align-items: center; gap: 4px; }
+        .qty-btn { width: 32px; height: 32px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all 150ms ease; color: #475569; }
+        .qty-btn:hover { background: #f0f4ff; border-color: #3b5bdb; color: #3b5bdb; }
+        .qty-num { display: inline-block; min-width: 36px; text-align: center; font-size: 0.95rem; font-weight: 700; padding: 4px 0; color: #111827; }
+        .btn-remove { background: none; border: none; color: #e63946; cursor: pointer; font-size: 18px; padding: 6px 10px; border-radius: 8px; transition: all 150ms ease; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-remove:hover { background: #fef2f2; transform: scale(1.1); }
+        .stock-warning { font-size: 0.75rem; color: #e63946; margin-top: 4px; font-weight: 600; }
     </style>
 </head>
-
 <body>
-    <br />
-    <h2>🛒 Your Cart</h2>
-    <br />
-    <div class="container">
-        <br />
-        
-        
+
+    @if (TempData["CartMessage"] != null)
+    {
+        <div id="toast" class="toast">@TempData["CartMessage"]</div>
+    }
+
+    <div class="header">
+        <h1>Your Cart</h1>
+        <a href="/Product/Index" class="back">← Back to Products</a>
+    </div>
+
+    <div class="card" id="cart-page">
+        <div id="cart-feedback" class="cart-feedback" role="status" aria-live="polite"></div>
 
         @if (Model == null || Model.CartItems.Count == 0)
         {
-            <p style="text-align:center;color:red;">Cart is empty</p>
+            <div class="empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                </svg>
+                <p>Your cart is empty</p>
+                <p class="empty-sub">Looks like you haven't added any items yet.</p>
+            </div>
         }
         else
         {
             decimal total = 0;
 
             <table>
-                <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Total</th>
-                </tr>
-
-                @foreach (var item in Model.CartItems)
-                {
-                    var itemTotal = item.Quantity * item.Product.Price;
-                    total += itemTotal;
-
+                <thead>
                     <tr>
-                        <td>
-                            <img src="@item.Product.ImageUrl" />
-                        </td>
-
-                        <td>@item.Product.Name</td>
-
-                        <td>@item.Product.Description</td>
-
-                        <td>@item.Product.Price</td>
-
-                        <td>@item.Quantity</td>
-
-                        <td>@itemTotal</td>
+                        <th class="img-col">Image</th>
+                        <th>Product</th>
+                        <th class="price-col">Price</th>
+                        <th class="qty-col">Qty</th>
+                        <th class="total-col">Total</th>
+                        <th></th>
                     </tr>
-                }
+                </thead>
+
+                <tbody>
+                    @foreach (var item in Model.CartItems)
+                    {
+                        if (item.Product == null) continue;
+                        var itemTotal = item.Quantity * item.Product.FinalPrice;
+                        total += itemTotal;
+
+                        <tr id="cart-row-@item.Id">
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
+                                {
+                                    <img class="prod-img" src="@item.Product.ImageUrl" alt="@item.Product.Name">
+                                }
+                                else
+                                {
+                                    <div class="prod-img-placeholder">📦</div>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="prod-name">@item.Product.Name</div>
+                                <div class="prod-desc">@item.Product.Description</div>
+                                @if (item.Product.Quantity <= 5 && item.Product.Quantity > 0)
+                                {
+                                    <div class="stock-warning">Only @item.Product.Quantity left in stock</div>
+                                }
+                                @if (item.Product.Quantity == 0)
+                                {
+                                    <div class="stock-warning">Out of stock</div>
+                                }
+                            </td>
+
+                            <td>
+                                <span class="price">
+                                    @item.Product.FinalPrice.ToString("N0") EGP
+                                    @if (item.Product.DiscountPercent > 0) { <small class="old-price">@item.Product.Price.ToString("N0")</small> }
+                                </span>
+                            </td>
+
+                            <td>
+                                <form asp-controller="Product" asp-action="UpdateQuantity" method="post" class="qty-form js-cart-form" data-row="cart-row-@item.Id">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" name="quantity" value="@(item.Quantity - 1)" class="qty-btn" aria-label="Decrease quantity">-</button>
+                                    <span class="qty-num" data-quantity>@item.Quantity</span>
+                                    <button type="submit" name="quantity" value="@(item.Quantity + 1)" class="qty-btn" aria-label="Increase quantity">+</button>
+                                </form>
+                            </td>
+
+                            <td>
+                                <span class="item-total">
+                                    @itemTotal.ToString("N0") EGP
+                                </span>
+                            </td>
+
+                            <td>
+                                <form asp-controller="Product" asp-action="RemoveCartItem" method="post" class="js-cart-form" data-row="cart-row-@item.Id" style="margin:0">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn-remove" title="Remove">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
             </table>
 
-            <div class="total">
-                <strong>Total Price: @total</strong>
+            <div class="footer">
+
+                <div>
+                    <div class="total-label">Total Price</div>
+                    <div class="total-value">
+                        @total.ToString("N0") EGP
+                    </div>
+                </div>
+
+                <div class="actions">
+
+                    <form asp-controller="Product"
+                          asp-action="ClearCart"
+                          method="post"
+                          style="margin:0" class="js-cart-form">
+
+                        <button type="submit" class="btn-clear js-cart-submit">
+                            🗑 Clear
+                        </button>
+
+                    </form>
+
+                    <a asp-controller="Product"
+                       asp-action="Checkout"
+                       class="btn btn-primary">
+
+                        Proceed To Checkout
+
+                    </a>
+                </div>
+
             </div>
-
-            <br />
-
-            <button class="btn buy-btn">Buy Now</button>
-            <br />
-            <form asp-controller="Product" asp-action="ClearCart" method="post">
-                <button type="submit" class="clear-btn">Clear</button>
-            </form>
-
         }
-
-        <br /><br />
-
-        <a href="/Product/Index" class="back-btn">⬅ Back</a>
 
     </div>
 

@@ -2,16 +2,30 @@
 {
     public class Order
     {
-        public int Id { get; set; } // Primary Key
+        public int Id { get; set; }
 
-        public int UserId { get; set; } // Foreign Key
+        public int UserId { get; set; }
 
-        public decimal TotalPrice { get; set; } // السعر الكلي للأوردر
+        public decimal TotalPrice { get; set; }
 
-        //  Navigation
-        public User User { get; set; }
+        public DateTime dateTime { get; set; } = DateTime.UtcNow;
 
-        //  المنتجات داخل الأوردر
-        public List<OrderItem> OrderItems { get; set; }
+        public string Status { get; set; } = "Pending";
+
+        public string? FullName { get; set; }
+
+        public string? Phone { get; set; }
+
+        public string? Address { get; set; }
+
+        public string? City { get; set; }
+
+        public string? Notes { get; set; }
+
+        public DateTime? DeliveryDate { get; set; }
+
+        public User? User { get; set; }
+
+        public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

@@ -1,143 +1,534 @@
 ﻿@model IEnumerable<E_Commerce.Models.Product>
+
 @{
     ViewData["Title"] = "Products";
     Layout = null;
+
+    var search = Context.Request.Query["searchTerm"].ToString();
+    var sort = Context.Request.Query["sortOrder"].ToString();
+    var searchTerm = ViewBag.SearchTerm as string ?? search;
+    var currentPage = (int)(ViewBag.CurrentPage ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var sortOrder = ViewBag.SortOrder as string ?? sort;
 }
+
+@if (TempData["CartMessage"] != null)
+{
+    <div id="toast" class="toast">
+        @TempData["CartMessage"]
+    </div>
+}
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
     <title>Products</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-    <link href="~/css/index.css" rel="stylesheet" />
-    <script src="~/js/index.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet" />
+
+    <link href="~/css/index.css"
+          rel="stylesheet" />
+
 </head>
+
 <body>
 
-    <header>
-        <div class="logo">E — Commerce</div>
-        <div class="header-actions">
-            <a href="/Products/Create" class="btn btn-primary">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                Add Product
+    <main class="page-shell">
+
+        <!-- HEADER -->
+
+        <header class="site-header">
+
+            <!-- LOGO -->
+
+            <a class="brand"
+               asp-controller="Product"
+               asp-action="Index">
+
+                <span class="brand-mark">
+                    E
+                </span>
+
+                <span class="brand-copy">
+
+                    <strong>
+                        E-Commerce
+                    </strong>
+
+                    @if (Context.Session.GetString("UserName") != null)
+                    {
+                        <span>
+                            Welcome
+                            @Context.Session.GetString("UserName")
+                        </span>
+                    }
+                    else
+                    {
+                        <span>
+                            Curated premium goods
+                        </span>
+                    }
+
+                </span>
+
             </a>
-        </div>
-    </header>
 
-    <div class="page">
+            <!-- NAVIGATION -->
 
-        <!-- Hero -->
-        <div class="hero">
-            <div>
-                <h1>Our <span>Products</span></h1>
-                <p>Manage and browse your entire catalog</p>
-            </div>
-        </div>
+            <nav class="nav-links">
 
-        <!-- Stats -->
-        <div class="stats">
-            <div class="stat">
-                <span class="stat-value" id="totalCount">0</span>
-                <span class="stat-label">Total Products</span>
-            </div>
-            <div class="stat">
-                <span class="stat-value" id="totalStock">0</span>
-                <span class="stat-label">Items in Stock</span>
-            </div>
-            <div class="stat">
-                <span class="stat-value" id="avgPrice">0</span>
-                <span class="stat-label">Avg. Price (EGP)</span>
-            </div>
-        </div>
+                <a class="active"
+                   asp-controller="Product"
+                   asp-action="Index">
 
-        <!-- Toolbar -->
-        <div class="toolbar">
-            <div class="search-wrap">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-            </div>
-            <select class="filter-select" id="sortSelect">
-                <option value="default">Default</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name">Name A–Z</option>
-                <option value="stock">Most Stock</option>
-            </select>
-        </div>
+                    Featured
 
-        <div class="Cart-btn">
-            <a asp-controller="Product" asp-action="Cart">🛒 Go To Cart</a>
-        </div>
+                </a>
 
-        <!-- Grid -->
-        <div class="grid" id="productsGrid">
+                <a asp-controller="Product"
+                   asp-action="Index"
+                   asp-route-sortOrder="name">
 
-            @if (!Model.Any())
+                    New
+
+                </a>
+
+                <a asp-controller="Product"
+                   asp-action="Index"
+                   asp-route-sortOrder="stock">
+
+                    Design
+
+                </a>
+
+                <!-- 🔥 MANAGER ONLY -->
+                @if (Context.Session.GetString("UserRole") == "Manager")
+                {
+                    <a asp-controller="Manage"
+                       asp-action="Index">
+
+                        Dashboard
+
+                    </a>
+                }
+
+            </nav>
+
+            <!-- RIGHT BUTTONS -->
+            @if (Context.Session.GetInt32("UserId") != null)
             {
-                <div class="empty">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z" />
-                        <path d="M16 3H8L6 7h12l-2-4z" />
-                    </svg>
-                    <p>No products found. Add your first product!</p>
+                <div style="display:flex; gap:10px; align-items:center;">
+
+                    <!-- CART -->
+
+                    <a class="cart-button"
+                       asp-controller="Product"
+                       asp-action="Cart">
+
+                        <span>Cart <strong data-cart-count>@(ViewBag.CartCount ?? 0)</strong></span>
+
+                        @* <strong>
+                            @Model.Sum(p => p.Quantity)
+                        </strong> *@
+
+                    </a>
+
+                    <!-- ORDERS -->
+
+                    <a class="cart-button"
+                       asp-controller="Order"
+                       asp-action="Index">
+
+                        Orders
+
+                    </a>
+
+                    <!-- PROFILE -->
+
+                    <a class="cart-button"
+                       asp-controller="Profile"
+                       asp-action="Index"
+                       style="background:#f1f5f9;color:#1e293b;">
+
+                        Profile
+
+                    </a>
+
+                    <!-- LOGOUT -->
+
+                    <a class="cart-button"
+                       asp-controller="Auth"
+                       asp-action="Logout">
+
+                        Logout
+
+                    </a>
+
                 </div>
             }
-
-            @foreach (var product in Model)
+            else
             {
-                <div class="card"
-                     data-name="@product.Name.ToLower()"
-                     data-price="@product.Price"
-                     data-qty="@product.Quantity">
+                <a class="cart-button"
+                   asp-controller="Auth"
+                   asp-action="SignIn">
 
-                    <div class="card-image">
-                        @if (!string.IsNullOrEmpty(product.ImageUrl))
-                        {
-                            <img src="~/images/@product.ImageUrl" alt="@product.Name" onerror="this.parentElement.innerHTML='No Image'" />
-                        }
-                        else
-                        {
-                            <span>No Image</span>
-                        }
+                    Login
+
+                </a>
+            }
+
+        </header>
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="hero-copy">
+
+                <p class="eyebrow">
+                    Premium essentials
+                </p>
+
+                <h1>
+                    Discover quality products for everyday life.
+                </h1>
+
+                <p>
+                    Browse our curated collection of electronics, home goods,
+                    accessories, and smart devices — all with fast delivery
+                    and secure checkout.
+                </p>
+
+            </div>
+
+            <!-- SEARCH PANEL -->
+
+            <aside class="search-panel">
+
+                <form method="get"
+                      class="search-form">
+
+                    <label class="search-wrap">
+
+                        <svg width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <circle cx="11"
+                                    cy="11"
+                                    r="8" />
+
+                            <line x1="21"
+                                  y1="21"
+                                  x2="16.65"
+                                  y2="16.65" />
+
+                        </svg>
+
+                        <input type="search"
+                               name="searchTerm"
+                               placeholder="Search products, brands, categories"
+                               value="@search" />
+
+                    </label>
+
+                    <select class="filter-select"
+                            name="sortOrder"
+                            onchange="this.form.submit()">
+
+                        <option value="">
+                            Default sorting
+                        </option>
+
+                        <option value="price-asc"
+                                selected="@(sort == "price-asc")">
+
+                            Price: Low to High
+
+                        </option>
+
+                        <option value="price-desc"
+                                selected="@(sort == "price-desc")">
+
+                            Price: High to Low
+
+                        </option>
+
+                        <option value="name"
+                                selected="@(sort == "name")">
+
+                            Name A-Z
+
+                        </option>
+
+                        <option value="stock"
+                                selected="@(sort == "stock")">
+
+                            Most Stock
+
+                        </option>
+
+                    </select>
+
+                </form>
+
+                <!-- STATS -->
+
+                <div class="stats">
+
+                    <div class="stat">
+
+                        <strong>
+                            @Model.Count()
+                        </strong>
+
+                        <span>
+                            Products
+                        </span>
+
                     </div>
 
-                    <div class="card-body">
-                        <div class="card-name">@product.Name</div>
-                        <div class="card-desc">@product.Description</div>
-                        <div class="card-meta">
-                            <span class="price">@product.Price.ToString("N0") EGP</span>
-                            @if (product.Quantity > 5)
+                    <div class="stat">
+
+                        <strong>
+                            @Model.Sum(p => p.Quantity)
+                        </strong>
+
+                        <span>
+                            In stock
+                        </span>
+
+                    </div>
+
+                    <div class="stat">
+
+                        <strong>
+                            @(ViewBag.Categories != null ? ((List<E_Commerce.Models.Category>)ViewBag.Categories).Count : 0)
+                        </strong>
+
+                        <span>
+                            Categories
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </section>
+
+        <!-- COLLECTION / PRODUCTS GRID -->
+
+        <section class="collection">
+
+            <div class="section-head">
+
+                <div>
+                    @if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <h2>Search results for "@searchTerm"</h2>
+                        <p>@Model.Count() product@(Model.Count() != 1 ? "s" : "") found.</p>
+                    }
+                    else if (ViewBag.SelectedCategoryName != null)
+                    {
+                        <h2>@ViewBag.SelectedCategoryName</h2>
+                        <p>Browse all products in this category.</p>
+                    }
+                    else
+                    {
+                        <h2>Our Products</h2>
+                        <p>Explore our full collection of quality products.</p>
+                    }
+                </div>
+
+                <div class="quick-filters">
+
+                    <a class="filter-pill @(ViewBag.SelectedCategory == null ? "active" : "")"
+                       asp-controller="Product"
+                       asp-action="Index">
+                        All
+                    </a>
+
+                    @if (ViewBag.Categories != null)
+                    {
+                        @foreach (var cat in (List<E_Commerce.Models.Category>)ViewBag.Categories)
+                        {
+                            <a class="filter-pill @(ViewBag.SelectedCategory == cat.Id ? "active" : "")"
+                               asp-controller="Product"
+                               asp-action="Index"
+                               asp-route-categoryId="@cat.Id">
+                                @cat.Name
+                            </a>
+                        }
+                    }
+
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                @if (!Model.Any())
+                {
+                    <div class="empty">
+                        <p>No products found.</p>
+                    </div>
+                }
+
+                @foreach (var product in Model)
+                {
+                    <article class="card">
+
+                            <a class="card-image" href="/Product/Details/@product.Id" aria-label="View @product.Name details">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
                             {
-                                <span class="badge badge-in">In Stock (@product.Quantity)</span>
-                            }
-                            else if (product.Quantity > 0)
-                            {
-                                <span class="badge badge-low">Low Stock (@product.Quantity)</span>
+                                <img src="@product.ImageUrl" alt="@product.Name" loading="lazy">
                             }
                             else
                             {
-                                <span class="badge badge-low">Out of Stock</span>
+                                <span>No Image</span>
                             }
+                            </a>
+
+                        <div class="card-body">
+
+                            <div class="card-topline">
+
+                                <span class="category">@(product.Category?.Name ?? "Product")</span>
+
+                                @if (product.DiscountPercent > 0)
+                                {
+                                    <span class="discount-badge">-@product.DiscountPercent.ToString("0")%</span>
+                                }
+                                else if (product.Quantity > 5)
+                                {
+                                    <span class="badge badge-in">In Stock</span>
+                                }
+                                else if (product.Quantity > 0)
+                                {
+                                    <span class="badge badge-low">Low Stock</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-out">Out of Stock</span>
+                                }
+
+                            </div>
+
+                            <h3 class="card-name">@product.Name</h3>
+                            @if (!string.IsNullOrWhiteSpace(product.Brand))
+                            {
+                                <span class="card-brand">@product.Brand</span>
+                            }
+                            <p class="card-desc">@product.Description</p>
+
+                            <div class="card-meta">
+                                <div>
+                                    @if (product.DiscountPercent > 0)
+                                    {
+                                        <span class="price">@product.FinalPrice.ToString("N0") EGP</span>
+                                        <span class="old-price">@product.Price.ToString("N0")</span>
+                                        <span class="discount-badge">-@product.DiscountPercent.ToString("0")%</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="price">@product.Price.ToString("N0") EGP</span>
+                                    }
+                                </div>
+                                <span class="rating">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                    Premium
+                                </span>
+                            </div>
+
+                            <div class="card-footer">
+                                <a href="/Product/Details/@product.Id" class="btn btn-ghost">Details</a>
+                                <form asp-controller="Product" asp-action="Buy" asp-route-id="@product.Id" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-primary">Buy Now</button>
+                                </form>
+                                <form asp-controller="Product" asp-action="AddToCart" asp-route-id="@product.Id" method="post" class="js-add-cart" style="display:inline;">
+                                    <button type="submit" class="btn btn-secondary">Add To Cart</button>
+                                </form>
+                            </div>
+
                         </div>
-                    </div>
 
-                    <div class="card-footer">
-                        <a href="/Product/Details/@product.Id" class="btn btn-ghost">Details</a>
-                        <a href="/Product/Buy/@product.Id" class="btn btn-primary">Buy</a>
-                        <a href="/Product/AddToCart/@product.Id" class="btn btn-danger">Add To Cart</a>
-                    </div>
+                    </article>
+                }
 
-                </div>
+            </div>
+
+            <!-- PAGINATION -->
+            @if (totalPages > 1)
+            {
+                <nav class="pagination" aria-label="Product pages">
+                    @if (currentPage > 1)
+                    {
+                        <a href="?page=@(currentPage-1)&searchTerm=@searchTerm&sortOrder=@sortOrder" aria-label="Previous page">&larr; Prev</a>
+                    }
+
+                    @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                    {
+                        <a href="?page=@i&searchTerm=@searchTerm&sortOrder=@sortOrder" class="@(i == currentPage ? "active" : "")" aria-label="Page @i" aria-current="@(i == currentPage ? "page" : null)">@i</a>
+                    }
+
+                    @if (currentPage < totalPages)
+                    {
+                        <a href="?page=@(currentPage+1)&searchTerm=@searchTerm&sortOrder=@sortOrder" aria-label="Next page">Next &rarr;</a>
+                    }
+                </nav>
             }
 
-        </div>
-    </div>
+        </section>
+
+        </main>
+    <script src="~/js/storefront.js" defer></script>
+    <script src="~/js/image-fallback.js" defer></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            // Search auto-submit with debounce
+            const searchInput = document.querySelector('input[name="searchTerm"]');
+
+            if (searchInput) {
+                const form = searchInput.closest("form");
+                let timeout;
+
+                searchInput.addEventListener("input", () => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        form.submit();
+                    }, 600);
+                });
+            }
+
+            // Toast notification
+            const toast = document.getElementById("toast");
+
+            if (toast) {
+                requestAnimationFrame(() => toast.classList.add("show"));
+
+                setTimeout(() => {
+                    toast.classList.remove("show");
+                }, 3200);
+            }
+
+        });
+    </script>
 
 </body>
+
 </html>

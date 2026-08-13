@@ -1,37 +1,41 @@
-﻿const cards = () => [...document.querySelectorAll('.card[data-name]')];
+﻿document.addEventListener("DOMContentLoaded", () => {
 
-// ── Stats ──
-const total = cards().length;
-const stock = cards().reduce((s, c) => s + parseInt(c.dataset.qty), 0);
-const avg = total ? Math.round(cards().reduce((s, c) => s + parseFloat(c.dataset.price), 0) / total) : 0;
+    const form = document.querySelector('form');
+    const searchInput = document.querySelector('input[name="searchTerm"]');
+    const sortSelect = document.querySelector('select[name="sortOrder"]');
+    let timeout;
 
-document.getElementById('totalCount').textContent = total;
-document.getElementById('totalStock').textContent = stock.toLocaleString();
-document.getElementById('avgPrice').textContent = avg.toLocaleString();
+    // 🔍 Search (Debounce)
+    if (searchInput) {
+        searchInput.addEventListener("input", () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                form.submit();
+            }, 500);
+        });
+    }
 
-// ── Search ──
-document.getElementById('searchInput').addEventListener('input', function () {
-    const q = this.value.toLowerCase();
-    cards().forEach(c => {
-        c.style.display = c.dataset.name.includes(q) ? '' : 'none';
-    });
+    // 🔃 Sort
+    if (sortSelect) {
+        sortSelect.addEventListener("change", () => {
+            form.submit();
+        });
+    }
+
+    // ✅ Toast from TempData (after redirect)
+    const toast = document.getElementById('toast');
+    if (toast) {
+        // Double rAF ensures browser renders the element before adding 'show'
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                toast.classList.add('show');
+            });
+        });
+
+        // Hide after 5 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 5000);
+    }
+
 });
-
-// ── Sort ──
-document.getElementById('sortSelect').addEventListener('change', function () {
-    const grid = document.getElementById('productsGrid');
-    const items = cards();
-
-    items.sort((a, b) => {
-        if (this.value === 'price-asc') return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-        if (this.value === 'price-desc') return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-        if (this.value === 'name') return a.dataset.name.localeCompare(b.dataset.name);
-        if (this.value === 'stock') return parseInt(b.dataset.qty) - parseInt(a.dataset.qty);
-        return 0;
-    });
-
-    items.forEach(c => grid.appendChild(c));
-});
-
-// ── Staggered animation ──
-cards().forEach((c, i) => { c.style.animationDelay = (i * 60) + 'ms'; });

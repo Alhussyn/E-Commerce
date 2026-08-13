@@ -1,0 +1,173 @@
+@model List<E_Commerce.Models.Order>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Orders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: 
+                radial-gradient(ellipse at top right, rgba(92, 124, 250, 0.08), transparent 50%),
+                linear-gradient(135deg, #f8faff 0%, #eef2ff 50%, #f5f8ff 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #111827;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        @@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .container { max-width: 900px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; animation: fadeInUp 400ms ease-out; }
+        .header h1 { font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; }
+        .back { display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; font-weight: 700; color: #3b5bdb; text-decoration: none; background: #eff6ff; padding: 10px 18px; border-radius: 12px; border: 1.5px solid #bfdbfe; transition: all 200ms ease; }
+        .back:hover { background: #dbeafe; transform: translateY(-1px); }
+
+        .order-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1.5px solid #e2e8f0;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: fadeInUp 500ms ease-out both;
+        }
+        .order-card:nth-child(2) { animation-delay: 80ms; }
+        .order-card:nth-child(3) { animation-delay: 160ms; }
+        .order-card:nth-child(4) { animation-delay: 240ms; }
+        .order-card:nth-child(5) { animation-delay: 320ms; }
+
+        .order-card:hover { box-shadow: 0 8px 30px rgba(59, 91, 219, 0.1); transform: translateY(-2px); }
+
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .order-id { font-weight: 800; font-size: 1rem; color: #111827; letter-spacing: -0.01em; }
+        .order-date { font-size: 0.82rem; color: #64748b; font-weight: 500; margin-top: 4px; }
+
+        .order-body { display: flex; justify-content: space-between; align-items: center; }
+        .order-info { display: flex; gap: 28px; }
+        .info-item { font-size: 0.82rem; color: #64748b; font-weight: 600; }
+        .info-item strong { display: block; font-size: 1rem; color: #111827; margin-top: 4px; font-weight: 800; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; border: 1px solid rgba(252, 211, 77, 0.5); }
+        .status-processing { background: #dbeafe; color: #1e40af; border: 1px solid rgba(147, 197, 253, 0.5); }
+        .status-shipped { background: #d1fae5; color: #065f46; border: 1px solid rgba(110, 231, 183, 0.5); }
+        .status-delivered { background: #dcfce7; color: #166534; border: 1px solid rgba(134, 239, 172, 0.5); }
+        .status-cancelled { background: #fee2e2; color: #991b1b; border: 1px solid rgba(252, 165, 165, 0.5); }
+
+        .btn-details {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #3b5bdb, #5c7cfa);
+            color: #fff;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 12px rgba(59, 91, 219, 0.2);
+        }
+        .btn-details:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 91, 219, 0.3); }
+
+        .empty {
+            text-align: center;
+            padding: 80px 24px;
+            color: #64748b;
+            animation: fadeInUp 500ms ease-out;
+        }
+        .empty svg { width: 64px; height: 64px; stroke: #cbd5e1; margin-bottom: 20px; }
+        .empty p { font-size: 1.1rem; margin-bottom: 20px; font-weight: 600; color: #475569; }
+        .empty a { color: #3b5bdb; text-decoration: none; font-weight: 700; transition: all 200ms ease; }
+        .empty a:hover { color: #4338ca; }
+
+        @@media (max-width: 640px) {
+            .order-body { flex-direction: column; align-items: flex-start; gap: 16px; }
+            .order-info { gap: 20px; }
+            .btn-details { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Orders</h1>
+            <a href="/Product/Index" class="back">← Back to Products</a>
+        </div>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
+                <p>You haven't placed any orders yet.</p>
+                <a href="/Product/Index">Start Shopping</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var order in Model)
+            {
+                var statusClass = order.Status?.ToLower() switch
+                {
+                    "pending" => "status-pending",
+                    "processing" => "status-processing",
+                    "shipped" => "status-shipped",
+                    "delivered" => "status-delivered",
+                    "cancelled" => "status-cancelled",
+                    _ => "status-pending"
+                };
+
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Order #@order.Id</div>
+                            <div class="order-date">@order.dateTime.ToString("MMM dd, yyyy HH:mm")</div>
+                        </div>
+                        <span class="status-badge @statusClass">@order.Status</span>
+                    </div>
+                    <div class="order-body">
+                        <div class="order-info">
+                            <div class="info-item">
+                                Items
+                                <strong>@order.OrderItems.Count</strong>
+                            </div>
+                            <div class="info-item">
+                                Total
+                                <strong>@order.TotalPrice.ToString("N0") EGP</strong>
+                            </div>
+                            @if (!string.IsNullOrEmpty(order.City))
+                            {
+                                <div class="info-item">
+                                    City
+                                    <strong>@order.City</strong>
+                                </div>
+                            }
+                        </div>
+                        <a href="/Order/Details/@order.Id" class="btn-details">View Details</a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</body>
+</html>

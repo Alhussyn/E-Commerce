@@ -2,19 +2,21 @@
 {
     public class OrderItem
     {
-        public int Id { get; set; } // Primary Key
+        public int Id { get; set; }
 
-        public int OrderId { get; set; } // FK للأوردر
+        public int OrderId { get; set; }
 
-        public int ProductId { get; set; } // FK للمنتج
+        public int ProductId { get; set; }
 
-        public int Quantity { get; set; } // الكمية
+        public int Quantity { get; set; }
 
-        public decimal Price { get; set; } // سعر المنتج وقت الشراء
+        public decimal Price { get; set; }
 
-        //  Navigation
-        public Order Order { get; set; }
+        public string ProductName { get; set; } = string.Empty;
 
-        public Product Product { get; set; }
+        // Navigation
+        public Order? Order { get; set; }
+
+        public Product? Product { get; set; }
     }
 }

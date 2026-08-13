@@ -1,0 +1,152 @@
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="~/css/auth.css">
+    <style>
+        .single-form-wrap {
+            min-height: 100vh; display: flex;
+            align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .single-card {
+            background: #fff; border-radius: 20px;
+            padding: 48px 40px; width: 100%; max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .form-header { text-align: center; margin-bottom: 28px; }
+        .form-icon   { font-size: 36px; display: block; margin-bottom: 12px; }
+        h2 { color: #1a1a2e; font-size: 24px; margin: 0 0 6px; }
+        .sub { color: #888; font-size: 14px; margin: 0 0 4px; }
+
+        /* OTP boxes */
+        .otp-row {
+            display: flex; gap: 10px; justify-content: center;
+            margin: 24px 0;
+        }
+        .otp-row input {
+            width: 48px; height: 56px;
+            text-align: center; font-size: 22px; font-weight: 700;
+            border: 2px solid #e0e0e0; border-radius: 10px;
+            transition: border-color .2s; color: #1a1a2e;
+        }
+        .otp-row input:focus {
+            outline: none; border-color: #4361ee;
+        }
+
+        button {
+            width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #4361ee, #7209b7);
+            color: #fff; border: none; border-radius: 10px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: opacity .2s;
+        }
+        button:hover { opacity: .88; }
+
+        .error-msg { color: #e63946; font-size: 13px; margin-top: 10px; text-align:center; }
+        .back-link { display:block; text-align:center; margin-top:18px;
+                     font-size:13px; color:#4361ee; text-decoration:none; }
+        .back-link:hover { text-decoration:underline; }
+
+        .timer { text-align:center; color:#888; font-size:13px; margin-top:10px; }
+        .timer span { color:#e63946; font-weight:700; }
+    </style>
+</head>
+<body>
+
+<div class="single-form-wrap">
+    <div class="single-card">
+
+        <div class="form-header">
+            <span class="form-icon">📩</span>
+            <h2>Enter OTP</h2>
+            <p class="sub">We sent a 6-digit code to your email.</p>
+            <p class="sub">It's valid for <strong>10 minutes</strong>.</p>
+        </div>
+
+        <form asp-controller="Auth" asp-action="VerifyOtp" method="post"
+              id="otpForm">
+
+            <!-- Hidden input receives assembled OTP -->
+            <input type="hidden" name="otp" id="otpHidden" />
+
+            <div class="otp-row">
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric" />
+            </div>
+
+            <button type="submit">Verify OTP</button>
+
+            @if (ViewBag.Error != null)
+            {
+                <p class="error-msg">⚠ @ViewBag.Error</p>
+            }
+
+        </form>
+
+        <p class="timer">Code expires in <span id="countdown">10:00</span></p>
+
+        <a class="back-link" asp-controller="Auth" asp-action="ForgotPassword">
+            ← Resend OTP
+        </a>
+
+    </div>
+</div>
+
+<script>
+    // ---- auto-advance between digit boxes ----
+    const digits  = document.querySelectorAll('.otp-digit');
+    const hidden  = document.getElementById('otpHidden');
+    const form    = document.getElementById('otpForm');
+
+    digits.forEach((box, i) => {
+        box.addEventListener('input', () => {
+            box.value = box.value.replace(/\D/g, '').slice(-1);
+            if (box.value && i < digits.length - 1) digits[i + 1].focus();
+            syncHidden();
+        });
+        box.addEventListener('keydown', e => {
+            if (e.key === 'Backspace' && !box.value && i > 0) {
+                digits[i - 1].focus();
+            }
+        });
+        // Support paste on first box
+        box.addEventListener('paste', e => {
+            const pasted = (e.clipboardData || window.clipboardData)
+                              .getData('text').replace(/\D/g, '').slice(0, 6);
+            if (pasted.length === 6) {
+                digits.forEach((d, idx) => d.value = pasted[idx] ?? '');
+                syncHidden();
+                digits[5].focus();
+            }
+            e.preventDefault();
+        });
+    });
+
+    function syncHidden() {
+        hidden.value = Array.from(digits).map(d => d.value).join('');
+    }
+
+    form.addEventListener('submit', () => syncHidden());
+
+    // ---- countdown timer (10 min) ----
+    let seconds = 600;
+    const tick = setInterval(() => {
+        seconds--;
+        if (seconds <= 0) { clearInterval(tick); document.getElementById('countdown').textContent = '00:00'; return; }
+        const m = String(Math.floor(seconds / 60)).padStart(2,'0');
+        const s = String(seconds % 60).padStart(2,'0');
+        document.getElementById('countdown').textContent = `${m}:${s}`;
+    }, 1000);
+</script>
+
+</body>
+</html>

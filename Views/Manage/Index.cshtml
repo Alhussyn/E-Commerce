@@ -1,0 +1,471 @@
+﻿@model IEnumerable<E_Commerce.Models.Product>
+
+@{
+    ViewData["Title"] = "Manage Products";
+    Layout = null;
+
+    var search = Context.Request.Query["searchTerm"].ToString();
+    var sort = Context.Request.Query["sortOrder"].ToString();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>Manage Products</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet" />
+
+    <link href="~/css/index.css"
+          rel="stylesheet" />
+
+</head>
+
+<body>
+
+    <main class="page-shell">
+
+        <!-- HEADER -->
+
+        <header class="site-header">
+
+            <a class="brand"
+               asp-controller="Manage"
+               asp-action="Index">
+
+                <span class="brand-mark">
+                    M
+                </span>
+
+                <span class="brand-copy">
+
+                    <strong>
+                        Manager Dashboard
+                    </strong>
+
+                    <span>
+                        Manage your products
+                    </span>
+
+                </span>
+
+            </a>
+
+            <nav class="nav-links">
+
+                <a class="active"
+                   asp-controller="Manage"
+                   asp-action="Index">
+
+                    Products
+
+                </a>
+
+                <a asp-controller="Manage"
+                   asp-action="Add">
+
+                    Add Product
+
+                </a>
+
+                <a asp-controller="Category"
+                   asp-action="Index">
+
+                    Categories
+
+                </a>
+
+                <a asp-controller="Manage"
+                   asp-action="Orders">
+
+                    Orders
+
+                </a>
+
+            </nav>
+
+            <a class="cart-button"
+               asp-controller="Auth"
+               asp-action="Logout">
+
+                Logout
+
+            </a>
+
+        </header>
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="hero-copy">
+
+                <p class="eyebrow">
+                    Store Dashboard
+                </p>
+
+                <h1>
+                    Manage your products professionally.
+                </h1>
+
+                <p>
+                    Add, edit, delete, and organize products
+                    with a clean modern dashboard experience.
+                </p>
+
+            </div>
+
+            <!-- SEARCH PANEL -->
+
+            <aside class="search-panel">
+
+                <form method="get"
+                      class="search-form">
+
+                    <label class="search-wrap">
+
+                        <svg width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+
+                            <circle cx="11"
+                                    cy="11"
+                                    r="8" />
+
+                            <line x1="21"
+                                  y1="21"
+                                  x2="16.65"
+                                  y2="16.65" />
+
+                        </svg>
+
+                        <input type="search"
+                               name="searchTerm"
+                               placeholder="Search products..."
+                               value="@search" />
+
+                    </label>
+
+                    <select class="filter-select"
+                            name="sortOrder"
+                            onchange="this.form.submit()">
+
+                        <option value="">
+                            Default
+                        </option>
+
+                        <option value="price-asc"
+                                selected="@(sort == "price-asc")">
+
+                            Price ↑
+
+                        </option>
+
+                        <option value="price-desc"
+                                selected="@(sort == "price-desc")">
+
+                            Price ↓
+
+                        </option>
+
+                        <option value="name"
+                                selected="@(sort == "name")">
+
+                            Name A-Z
+
+                        </option>
+
+                        <option value="stock"
+                                selected="@(sort == "stock")">
+
+                            Stock
+
+                        </option>
+
+                    </select>
+
+                </form>
+
+                <!-- STATS -->
+
+                <div class="stats">
+
+                    <div class="stat">
+
+                        <strong>
+                            @Model.Count()
+                        </strong>
+
+                        <span>
+                            Total Products
+                        </span>
+
+                    </div>
+
+                    <div class="stat">
+
+                        <strong>
+                            @Model.Sum(p => p.Quantity)
+                        </strong>
+
+                        <span>
+                            Items In Stock
+                        </span>
+
+                    </div>
+
+                    <div class="stat">
+
+                        <strong>
+                            @(Model.Any()
+                                                        ? Math.Round(Model.Average(p => p.Price))
+                                                        : 0)
+                        </strong>
+
+                        <span>
+                            Avg Price
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </section>
+
+        <!-- DASHBOARD STATS -->
+
+        <section style="margin: 24px 0;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+                <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: #1e293b;">@ViewBag.TotalProducts</div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Products</div>
+                </div>
+                <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: #1e293b;">@ViewBag.TotalOrders</div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Orders</div>
+                </div>
+                <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: #10b981;">@(((decimal)ViewBag.TotalRevenue).ToString("N0")) EGP</div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Revenue</div>
+                </div>
+                <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: #1e293b;">@ViewBag.TotalCustomers</div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Customers</div>
+                </div>
+                <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: @(ViewBag.PendingOrders > 0 ? "#f59e0b" : "#1e293b");">@ViewBag.PendingOrders</div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Pending</div>
+                </div>
+                <div style="background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                    <div style="font-size: 28px; font-weight: 800; color: @(ViewBag.LowStockProducts > 0 ? "#e63946" : "#1e293b");">@ViewBag.LowStockProducts</div>
+                    <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Low Stock</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ADD BUTTON -->
+
+        <section class="section-head">
+
+            <div>
+
+                <h2>
+                    Product Collection
+                </h2>
+
+                <p>
+                    Manage all products inside your store.
+                </p>
+
+            </div>
+
+            <div class="quick-filters">
+
+                <a asp-controller="Manage"
+                   asp-action="Add"
+                   class="filter-pill active">
+
+                    + Add Product
+
+                </a>
+
+            </div>
+
+        </section>
+
+        <!-- PRODUCTS -->
+
+        <div class="grid">
+
+            @if (!Model.Any())
+            {
+                <div class="empty">
+
+                    <p>
+                        No products found.
+                    </p>
+
+                </div>
+            }
+
+            @foreach (var product in Model)
+            {
+                <div class="card">
+
+                    <!-- IMAGE -->
+
+                    <div class="card-image">
+
+                        <img src="@product.ImageUrl"
+                             loading="lazy"
+                             alt="@product.Name" />
+
+                    </div>
+
+                    <!-- BODY -->
+
+                    <div class="card-body">
+
+                        <div class="card-topline">
+
+                            <span class="category">
+                                Product
+                            </span>
+
+                            @if (product.Quantity > 5)
+                            {
+                                <span class="badge badge-in">
+                                    In Stock
+                                </span>
+                            }
+                            else if (product.Quantity > 0)
+                            {
+                                <span class="badge badge-low">
+                                    Low Stock
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-out">
+                                    Out Of Stock
+                                </span>
+                            }
+
+                        </div>
+
+                        <h3 class="card-name">
+                            @product.Name
+                        </h3>
+
+                        <div class="card-desc">
+                            @product.Description
+                        </div>
+
+                        <div class="card-meta">
+
+                            <span class="price">
+                                @product.Price.ToString("N0") EGP
+                            </span>
+
+                            <span class="rating">
+                                Qty:
+                                @product.Quantity
+                            </span>
+
+                        </div>
+
+                        <!-- BUTTONS -->
+
+                        <div class="card-footer">
+
+                            <a asp-controller="Product"
+                               asp-action="Details"
+                               asp-route-id="@product.Id"
+                               class="btn btn-ghost">
+
+                                Details
+
+                            </a>
+
+                            <a asp-controller="Manage"
+                               asp-action="Edit"
+                               asp-route-id="@product.Id"
+                               class="btn btn-primary">
+
+                                Edit
+
+                            </a>
+
+                            <form asp-controller="Manage"
+                                  asp-action="Delete"
+                                  asp-route-id="@product.Id"
+                                  method="post">
+
+                                <button type="submit"
+                                        class="btn btn-primary"
+                                        style="width:100%;">
+
+                                    Delete
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </main>
+
+    <!-- SEARCH -->
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const searchInput =
+                document.querySelector(
+                    'input[name="searchTerm"]'
+                );
+
+            const form =
+                searchInput.closest('form');
+
+            let timeout;
+
+            searchInput.addEventListener("input", () => {
+
+                clearTimeout(timeout);
+
+                timeout = setTimeout(() => {
+
+                    form.submit();
+
+                }, 500);
+
+            });
+
+        });
+
+    </script>
+
+</body>
+
+</html>

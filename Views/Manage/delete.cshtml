@@ -1,0 +1,93 @@
+﻿@model Product
+
+@{
+    ViewData["Title"] = "Delete Product";
+}
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+                <!-- Header -->
+                <div class="bg-danger text-white p-4 text-center">
+                    <h2 class="fw-bold mb-1">
+                        Delete Product
+                    </h2>
+
+                    <p class="mb-0 opacity-75">
+                        Are you sure you want to delete this product?
+                    </p>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-4">
+
+                    <div class="text-center mb-4">
+
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img src="@Model.ImageUrl"
+                                 class="img-fluid rounded-4 shadow-sm"
+                                 alt="@Model.Name"
+                                 style="height:250px; object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <img src="https://via.placeholder.com/300x250"
+                                 class="img-fluid rounded-4 shadow-sm" />
+                        }
+
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted">Product Name</label>
+
+                        <div class="form-control bg-light py-2">
+                            @Model.Name
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted">Price</label>
+
+                        <div class="form-control bg-light py-2">
+                            $ @Model.Price
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold text-muted">Description</label>
+
+                        <div class="form-control bg-light py-3">
+                            @Model.Description
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <form asp-action="Delete" class="d-flex gap-3 mt-4">
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <button type="submit"
+                                class="btn btn-danger w-50 py-2 rounded-3 fw-semibold">
+                            <i class="bi bi-trash3-fill"></i>
+                            Delete
+                        </button>
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary w-50 py-2 rounded-3 fw-semibold">
+                            Cancel
+                        </a>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
